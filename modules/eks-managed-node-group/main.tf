@@ -431,11 +431,11 @@ resource "aws_iam_role" "this" {
 
 # Policies attached ref https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/eks_node_group
 resource "aws_iam_role_policy_attachment" "this" {
-  for_each = { for k, v in toset(compact([
-    "${local.iam_role_policy_prefix}/AmazonEKSWorkerNodePolicy",
-    "${local.iam_role_policy_prefix}/AmazonEC2ContainerRegistryReadOnly",
-    var.iam_role_attach_cni_policy ? local.cni_policy : "",
-  ])) : k => v if var.create && var.create_iam_role }
+  for_each = { for k, v in {
+    eks_workers: "${local.iam_role_policy_prefix}/AmazonEKSWorkerNodePolicy",
+    ec2_read: "${local.iam_role_policy_prefix}/AmazonEC2ContainerRegistryReadOnly",
+    cni: var.iam_role_attach_cni_policy ? local.cni_policy : "",
+  } : k => v if var.create && var.create_iam_role }
 
   policy_arn = each.value
   role       = aws_iam_role.this[0].name
